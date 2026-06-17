@@ -1,0 +1,28 @@
+# Secrets
+.env
+*.env
+secrets.py
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# SLURM job outputs
+jobs/
+logs/
+logs_err/
+
+# Large data/output files (add specific ones to track if needed)
+*.csv
+*.parquet
+*.jsonl
+*.json
+
+# macOS
+.DS_Store
