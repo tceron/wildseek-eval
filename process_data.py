@@ -796,23 +796,24 @@ def compute_agreement_between_annotators(labels_annotator1="tani_revisited", lab
 
 def add_query_domain_csv():
     # filename = "gpt-5.4_forced_search_tool_2026-04-28_10-58-09.csv"
-    filename = "meta-llama-Llama-3.3-70B-Instruct.csv"
+    filename = "gemini-3.1-flash-lite-preview_2026-06-17_15-28-13.csv"
+    path = "generated_responses"
     # df = pd.read_csv(f"/data1/shared_datasets/project-info-seeking/generated_answers_for_queries/with_forced_search/{filename}")
-    df = pd.read_csv(f"/home/ceron/info-seeking-output-analysis-private/generated_responses/hf_models/{filename}")
+    df = pd.read_csv(f"{path}/{filename}") 
     
     if "gpt-5.4_forced_search_tool" in filename: 
     # remove all links from response column which are in this format [link text](url)
         df["response"] = df["response"].str.replace(r"\[.*?\]\(.*?\)", "", regex=True).str.replace("()", "", regex=False)
 
-    df_info = pd.read_csv("data_prompts/man-annotated-train-high-risk.csv")
-    id2domain = dict(zip(df_info["prompt_id"], df_info["high_risk_label"]))
+    df_info = pd.read_csv("data_prompts/wildseek.csv")
+    id2domain = dict(zip(df_info["prompt_id"], df_info["factual_or_analytical"]))
     df["domain"] = df["prompt_id"].apply(lambda x: id2domain.get(x, "NA"))
     id2query = dict(zip(df_info["prompt_id"], df_info["content"]))
     df["query"] = df["prompt_id"].apply(lambda x: id2query.get(x, "NA"))
-    df.to_csv(f"/home/ceron/info-seeking-output-analysis-private/generated_responses/hf_models/{filename}", index=False)
+    df.to_csv(f"{path}/processed_{filename}", index=False)
 
 def count_unique_domains_per_model(filename="data/domains/prompt_id_links_clsf.json"):
-    annotations = pd.read_csv("data_prompts/man-annotated-train-high-risk.csv")
+    annotations = pd.read_csv("data_prompts/wildseek.csv")
     prompt_id_to_domain = dict(zip(annotations["prompt_id"], annotations["annotation"]))
     with open(filename, "r") as f:
         data = json.load(f)
@@ -835,7 +836,7 @@ def count_unique_domains_per_model(filename="data/domains/prompt_id_links_clsf.j
     return results
 
 def count_total_domains_per_model(filename="data/domains/prompt_id_links_clsf.json"):
-    annotations = pd.read_csv("data_prompts/man-annotated-train-high-risk.csv")
+    annotations = pd.read_csv("data_prompts/wildseek.csv")
     prompt_id_to_domain = dict(zip(annotations["prompt_id"], annotations["annotation"]))
     with open(filename, "r") as f:
         data = json.load(f)
@@ -859,7 +860,7 @@ def count_total_domains_per_model(filename="data/domains/prompt_id_links_clsf.js
 
 
 def compute_pielou_evenness(filename="data/domains/prompt_id_links_clsf.json"):
-    annotations = pd.read_csv("data_prompts/man-annotated-train-high-risk.csv")
+    annotations = pd.read_csv("data_prompts/wildseek.csv")
     prompt_id_to_annotation = dict(zip(annotations["prompt_id"], annotations["annotation"]))
     with open(filename, "r") as f:
         data = json.load(f)
@@ -980,7 +981,7 @@ if __name__ == "__main__":
     # merge_joes_annotations()
     # compute_agreement_between_annotators("tani_label", "joe_label")
     # compute_agreement_between_annotators()
-    # add_query_domain_csv()
+    add_query_domain_csv()
     # process_urls_for_scraper()
     # count_unique_domains_per_model()
     # compute_pielou_evenness()

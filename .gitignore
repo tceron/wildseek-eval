@@ -26,3 +26,6 @@ logs_err/
 
 # macOS
 .DS_Store
+
+#data
+generated_responses/

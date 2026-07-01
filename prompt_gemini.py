@@ -1,7 +1,6 @@
 import os
 import glob
 import time
-import json
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from google import genai
@@ -20,7 +19,6 @@ client = genai.Client(api_key=api)
 
 MODEL_NAME= "gemini-3.1-flash-lite-preview" #"gemini-3.1-pro-preview"
 MAX_OUTPUT_TOKENS = 2048
-POLL_INTERVAL_SECONDS = 30
 
 def prompt_with_search():
     # Dynamic Grounding Configuration
@@ -57,33 +55,6 @@ def prompt_with_search():
                 if chunk.web:
                     print(f"- {chunk.web.title}: {chunk.web.uri}")
 
-def _wait_for_batch(job_name):
-    while True:
-        batch_job = client.batches.get(name=job_name)
-        state_name = getattr(batch_job.state, "name", str(batch_job.state))
-        if state_name in ("JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED"):
-            return batch_job
-        print(f"Batch {job_name} state: {state_name}. Waiting {POLL_INTERVAL_SECONDS}s...")
-        time.sleep(POLL_INTERVAL_SECONDS)
-
-def _extract_text_from_response(parsed_response):
-    candidates = parsed_response.get("candidates", [])
-    if not candidates:
-        return ""
-    first_candidate = candidates[0] or {}
-    content = first_candidate.get("content", {}) or {}
-    parts = content.get("parts", []) or []
-    text_parts = [part.get("text", "") for part in parts if isinstance(part, dict)]
-    return "".join(text_parts).strip()
-
-def _to_dict(value):
-    if isinstance(value, dict):
-        return value
-    if hasattr(value, "model_dump"):
-        return value.model_dump()
-    if hasattr(value, "to_dict"):
-        return value.to_dict()
-    return {}
 
 def run_parallel(items, worker_fn, max_workers=8, desc="Processing"):
     results = [None] * len(items)
@@ -182,49 +153,48 @@ def run_gemini_with_web_search(forced: bool = True, max_workers=6, max_rows=None
 
     return all_outputs
 
-outputs = run_gemini_with_web_search(forced=True, max_workers=6, max_rows=None)
+# outputs = run_gemini_with_web_search(forced=True, max_workers=6, max_rows=None)
 
 
-def generate_answers_queries():
+def generate_answers_queries(max_workers=6, max_rows=None):
 
-    dataset = "man-annotated-train-high-risk"
-    df = pd.read_csv(f'data_prompts/{dataset}.csv')  # Assuming a CSV file with questions
+    dataset = "wildseek"
+    df = pd.read_csv(f'data_prompts/{dataset}.csv')
     df = df[df["high_risk_label"] != "Other"]
 
     run_id = get_experiment_start_date()
-    base_dir = f"generated_responses/{dataset}"
+    base_dir = "generated_responses"
     filename = f"{base_dir}/{MODEL_NAME}_{run_id}.csv"
-
     os.makedirs(base_dir, exist_ok=True)
     print(filename)
 
-    batch_requests = [
-        {
-            "contents": [{"parts": [{"text": row.content}]}],
-            "config": {
-                "temperature": 0,
-                "max_output_tokens": MAX_OUTPUT_TOKENS,
-            },
-        }
-        for row in df.itertuples(index=False)
-    ]
-    batch_job = client.batches.create(
-        model=MODEL_NAME,
-        src=batch_requests,
-        config={"display_name": f"{dataset}-{run_id}"},
+    rows = list(zip(df["prompt_id"].tolist(), df["content"].tolist()))
+    if max_rows is not None:
+        rows = rows[:max_rows]
+
+    config = types.GenerateContentConfig(
+        temperature=0,
+        max_output_tokens=MAX_OUTPUT_TOKENS,
     )
-    print(f"Created batch job: {batch_job.name}")
 
-    finished_job = _wait_for_batch(batch_job.name)
-    final_state = getattr(finished_job.state, "name", str(finished_job.state))
-    if final_state != "JOB_STATE_SUCCEEDED":
-        raise RuntimeError(f"Batch job ended with state={final_state}")
-
-    inline_responses = []
-    if getattr(finished_job, "dest", None) and getattr(finished_job.dest, "inlined_responses", None):
-        inline_responses = finished_job.dest.inlined_responses
-    else:
-        raise RuntimeError("Batch succeeded but inlined responses are missing.")
+    def _run_single(row):
+        prompt_id, content = row
+        for attempt in range(5):
+            try:
+                response = client.models.generate_content(
+                    model=MODEL_NAME,
+                    contents=content,
+                    config=config,
+                )
+                return prompt_id, content, response.text or ""
+            except (genai_errors.ServerError, genai_errors.ClientError) as e:
+                retryable = ("503" in str(e)) or ("429" in str(e))
+                if retryable and attempt < 4:
+                    wait = 2 ** attempt * 10 + random.uniform(0, 5)
+                    print(f"API error ({e}), retrying in {wait:.1f}s (attempt {attempt + 1}/5)...")
+                    time.sleep(wait)
+                else:
+                    raise
 
     success_count = 0
     error_count = 0
@@ -232,35 +202,29 @@ def generate_answers_queries():
         writer = csv.writer(f)
         writer.writerow(["prompt_id", "response"])
 
-        for idx, row in tqdm.tqdm(
-            enumerate(df.itertuples(index=False)),
-            total=len(df),
-            desc="Parsing batch results",
-        ):
-            prompt_id = str(row.prompt_id)
-            if idx >= len(inline_responses):
-                generated_response = "ERROR: Missing batch result"
-            else:
-                inline_response = _to_dict(inline_responses[idx])
-                if "response" in inline_response:
-                    response_payload = _to_dict(inline_response.get("response"))
-                    generated_response = _extract_text_from_response(response_payload)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(_run_single, row): row for row in rows}
+            for future in tqdm.tqdm(as_completed(futures), total=len(rows), desc="Processing"):
+                prompt_id, content = futures[future]
+                try:
+                    pid, query, generated_response = future.result()
+                except Exception as e:
+                    pid, query = prompt_id, content
+                    generated_response = f"ERROR: {e}"
+
+                # print(f"\n[Query {pid}] {query}")
+                # print(f"[Response {pid}] {generated_response}")
+                writer.writerow([pid, generated_response])
+                f.flush()
+
+                if str(generated_response).startswith("ERROR:"):
+                    error_count += 1
                 else:
-                    error_obj = inline_response.get("error", {})
-                    generated_response = f"ERROR: {json.dumps(error_obj, ensure_ascii=False)}"
+                    success_count += 1
 
-            writer.writerow([prompt_id, generated_response])
-            f.flush()
+    print(f"Saved {len(rows)} rows to {filename} ({success_count} success, {error_count} errors)")
 
-            if str(generated_response).startswith("ERROR:"):
-                error_count += 1
-            else:
-                success_count += 1
-
-    print(f"Saved {len(df)} rows to {filename} ({success_count} success, {error_count} errors)")
-
-# for i in range(1):   
-#     generate_answers_queries()
+# generate_answers_queries()
 
 def resolve_redirect(url: str) -> str:
     class NoRedirect(urllib.request.HTTPRedirectHandler):
