@@ -1,0 +1,19 @@
+Mann-Whitney U Test — H1: search > base (one-tailed)
+
+--- GPT-5.4 ---
+  N base=1121, N search=1121
+  Mean  base=0.8896, search=0.8959
+  Median base=0.9549, search=0.9545
+  U=625745.5, p=0.5670, effect r=-0.0036
+
+--- Gemini ---
+  N base=647, N search=1119
+  Mean  base=0.8657, search=0.9158
+  Median base=0.9217, search=0.9514
+  U=451036.5, p=0.0000, effect r=inf
+
+--- Claude ---
+  N base=1120, N search=1111
+  Mean  base=0.8784, search=0.8524
+  Median base=0.9322, search=0.9157
+  U=547987.5, p=1.0000, effect r=-0.1033
