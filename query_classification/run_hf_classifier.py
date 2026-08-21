@@ -118,26 +118,15 @@ def main():
             f"(label map key: {label_key!r})"
         )
 
-    map2label = {"Analytical": "Analytical", "Subjective": "Analytical", "Factual": "Factual", "Predictive": "Analytical", "Procedural": "Factual"}
     SEED = 42
     print(f"Loading model from: {args.repo_id}")
     tokenizer, model = load_hf_model(args.repo_id)
     print(f"Using device: {DEVICE}")
     print(f"Using MAX_LEN={MAX_LEN}")
 
-    # data = pd.read_csv(args.input_csv)
-    # if "content" not in data.columns:
-    #     raise ValueError("Input CSV must include a 'content' column.")
-    # if "id" not in data.columns:
-    #     data["id"] = data.index.astype(str)
-
-    # data = data[~data["content"].isna()].reset_index(drop=True)
-    # data["content"] = data["content"].astype(str)
-
-    df = pd.read_csv(f"data_prompts/infoseek-llm.csv")
+    df = pd.read_csv(f"data_prompts/wildseek.csv")
     df = df.dropna(subset=["annotation", "content"])
     df.rename(columns={"annotation": "ground_truth"}, inplace=True)
-    df["ground_truth"] = df["ground_truth"].map(map2label)
     print("df after mapping:", df)
     print(df["ground_truth"].value_counts())
     _, df_test = train_test_split(
