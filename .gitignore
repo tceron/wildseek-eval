@@ -33,3 +33,6 @@ generated_responses/
 #slurm
 *.sh
 */*.sh
+
+# GitHub Pages site data
+!docs/data/*.json

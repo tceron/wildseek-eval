@@ -22,6 +22,17 @@ Download the files from that project page before running any of the scripts or n
 - `scrape_mbfc.py` — scrapes source credibility ratings (Media Bias/Fact Check)
 - `analyze_search_results.ipynb`, `credibility.ipynb`, `safety_analysis_results.ipynb`, `safety_eval.ipynb`, `topic_analysis.ipynb`, `visualize_results.ipynb` — analysis and visualization notebooks
 
+## Project website
+
+`docs/` holds a static site (served with GitHub Pages) for exploring the results and annotations. It has no build step. To refresh its data after changing the CSVs:
+
+```bash
+python docs/build_data.py          # writes docs/data/*.json
+python -m http.server -d docs      # preview at http://localhost:8000
+```
+
+To publish, open the repo's **Settings → Pages**, choose *Deploy from a branch*, then select `main` and `/docs`.
+
 ## Citation
 
 If you use this code or data, please cite:
