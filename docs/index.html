@@ -26,24 +26,25 @@
 <main id="top">
   <section class="hero wrap">
     <h1 class="hero-title"><span class="title-name">WildSeek</span><span class="title-sub">Evaluating Language Models for Information-Seeking</span></h1>
-    <p class="lede">WildSeek is a manually annotated dataset of 3,077 information-seeking queries taken from real user–LLM conversations. Each query is labelled with a <strong>risk-sensitive domain</strong> and an <strong>open-endedness type</strong> (factoid or analytical). We used it to train classifiers and ran them over 1.8M+ real queries. Alongside the dataset, we propose an <a href="framework.html#framework">evaluation framework</a> for LLMs in the context of information seeking, which scores responses for <strong>reliability</strong>, <strong>fairness</strong> and <strong>safety</strong>.</p>
-    <ol class="rqs">
-      <li><span class="rq-id">RQ1</span><p>How often do information-seeking queries involve risk-sensitive domains or analytical questions that go beyond factual retrieval?</p><a href="#queries">See results →</a></li>
-      <li><span class="rq-id">RQ2</span><p>What risks do LLM responses introduce for information seekers, and how frequently do they occur?</p><a href="framework.html#failures">See results →</a></li>
-      <li><span class="rq-id">RQ3</span><p>To what extent does web search functionality integrated into LLMs improve how reliably, fairly, and safely responses are?</p><a href="framework.html#reliability">See results →</a></li>
-    </ol>
-    <div class="findings">
-      <h2>Main findings</h2>
-      <ol>
-        <li><span class="rq-tag">RQ1</span><p><strong>Information seeking is the most common use, and much of it is high-stakes.</strong> It accounts for about 40% of user turns, from 42% in LMSYS-Chat-1M to 74% in SES. Of those queries, 37% touch a risk-sensitive domain, led by moral values &amp; religion, health, and economic &amp; financial. 60% are analytical rather than factoid.</p></li>
-        <li class="spotlight">
-          <div class="spot-text">
-            <span class="rq-tag">RQ2</span>
-            <p class="spot-head">Analytical queries yield more unsafe responses</p>
-            <p class="spot-num"><span>+4.0 pp</span> higher failure rate than factoid queries</p>
-            <p>Failures rise in 4 of 6 criteria, with significant results for at least one model in each. The gap is largest for overreliance: 21.3% vs. 7.3%, about 3× higher, for every model with and without search. Anthropomorphism shows the same pattern (6.2% vs. 1.9%).</p>
-            <button type="button" class="btn small" id="spotCompare">Compare by model and domain →</button>
-          </div>
+    <p class="lede">WildSeek is a manually annotated dataset of 3,077 information-seeking queries taken from real user–LLM conversations. Each query is labelled with a <strong>risk-sensitive domain</strong> and an <strong>open-endedness type</strong> (factoid or analytical). We used it to train classifiers and ran them over 1.8M+ real queries. Alongside the dataset, we propose an <a href="framework.html#framework">evaluation framework</a> for LLMs in the context of information seeking, which scores responses for <strong>reliability</strong>, <strong>fairness</strong> and <strong>safety</strong>. With the dataset and the framework, we ask and answer the questions below.</p>
+    <div class="qa-grid">
+      <article class="qa">
+        <p class="qa-q">How often do people use LLMs to seek information?</p>
+        <p class="qa-a">~40%</p>
+        <p class="qa-s">of user turns are information-seeking, and 37% of those touch a risk-sensitive domain.</p>
+        <details class="qa-more">
+          <summary>Details</summary>
+          <p>Information seeking is the most common use: it accounts for about 40% of user turns, from 42% in LMSYS-Chat-1M to 74% in SES. Of those queries, 37% touch a risk-sensitive domain, led by moral values &amp; religion, health, and economic &amp; financial. 60% are analytical rather than factoid.</p>
+          <a href="#queries" class="qa-link">See the in-the-wild figures →</a>
+        </details>
+      </article>
+      <article class="qa">
+        <p class="qa-q">Do analytical queries get less safe answers?</p>
+        <p class="qa-a">+4.0 pp</p>
+        <p class="qa-s">Yes. Analytical queries fail more often than factoid ones.</p>
+        <details class="qa-more">
+          <summary>Details</summary>
+          <p>Failures rise in 4 of 6 criteria, with significant results for at least one model in each. The gap is largest for overreliance: 21.3% vs. 7.3%, about 3× higher, for every model with and without search. Anthropomorphism shows the same pattern (6.2% vs. 1.9%).</p>
           <div class="spot-chart">
             <div class="legend">
               <span class="key"><span class="dot" style="background:var(--factoid)"></span>Factoid</span>
@@ -52,11 +53,43 @@
             <div class="dumbbell" id="spotChart" role="img" aria-label="Failure rate by criterion, factoid vs analytical queries"></div>
             <p class="caption">Failure rate (%), averaged over models and setups (Table 5). * marks a criterion where analytical is significantly higher for at least one model.</p>
           </div>
-        </li>
-        <li><span class="rq-tag">RQ2</span><p><strong>The most frequent failures are overreliance, vulnerable-population harm, US bias and sycophancy.</strong> Overreliance averages 14.3% across models and setups. The other three average about 9% each.</p></li>
-        <li><span class="rq-tag">RQ3</span><p><strong>Web search is not a reliable fix.</strong> It significantly improves factuality only for Gemini-3.1 (+0.049). It does not reduce US-centric framing overall, and only Gemini-3.1 becomes consistently safer with it. Claude Sonnet 4.6 becomes more sycophantic with search (from 10.3% to 48.5% on analytical queries).</p></li>
-        <li><span class="rq-tag">RQ3</span><p><strong>Credible sources are not necessarily diverse ones.</strong> With search on, GPT-5.4 cites the largest share of highly credible sources (about 76–77%). It also draws on five to seven times fewer unique web domains than the other models, and spreads its citations less evenly across them.</p></li>
-      </ol>
+          <button type="button" class="btn small" id="spotCompare">Compare by model and domain →</button>
+        </details>
+      </article>
+      <article class="qa">
+        <p class="qa-q">What goes wrong most often?</p>
+        <ol class="qa-top" aria-label="Top three failures by average failure rate">
+          <li><span class="qa-rank">1</span><span class="qa-name">Overreliance</span><span class="qa-val">14.3%</span><span class="qa-bar"><span style="width:100%"></span></span></li>
+          <li><span class="qa-rank">2</span><span class="qa-name">Vulnerable population</span><span class="qa-val">9.3%</span><span class="qa-bar"><span style="width:65%"></span></span></li>
+          <li><span class="qa-rank">3</span><span class="qa-name">Sycophancy</span><span class="qa-val">8.6%</span><span class="qa-bar"><span style="width:60%"></span></span></li>
+        </ol>
+        <p class="qa-s">Average failure rate across models and setups.</p>
+        <details class="qa-more">
+          <summary>Details</summary>
+          <p>The most frequent failures are overreliance, vulnerable-population harm, US bias and sycophancy. Overreliance averages 14.3% across models and setups. The other three average about 9% each.</p>
+          <a href="framework.html#failures" class="qa-link">Explore failure rates →</a>
+        </details>
+      </article>
+      <article class="qa">
+        <p class="qa-q">Does web search make answers better?</p>
+        <p class="qa-a">Not reliably</p>
+        <p class="qa-s">Only Gemini-3.1 clearly benefits from search.</p>
+        <details class="qa-more">
+          <summary>Details</summary>
+          <p>Web search significantly improves factuality only for Gemini-3.1 (+0.049). It does not reduce US-centric framing overall, and only Gemini-3.1 becomes consistently safer with it. Claude Sonnet 4.6 becomes more sycophantic with search (from 10.3% to 48.5% on analytical queries).</p>
+          <a href="framework.html#reliability" class="qa-link">See reliability results →</a>
+        </details>
+      </article>
+      <article class="qa">
+        <p class="qa-q">Are credible sources also diverse?</p>
+        <p class="qa-a">Not necessarily</p>
+        <p class="qa-s">The model citing the most credible sources draws on the fewest web domains.</p>
+        <details class="qa-more">
+          <summary>Details</summary>
+          <p>With search on, GPT-5.4 cites the largest share of highly credible sources (about 76–77%). It also draws on five to seven times fewer unique web domains than the other models, and spreads its citations less evenly across them.</p>
+          <a href="framework.html#reliability" class="qa-link">See source diversity →</a>
+        </details>
+      </article>
     </div>
   </section>
 
