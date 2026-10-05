@@ -107,8 +107,11 @@ a { color: var(--accent); }
 }
 
 .hero { padding: 56px 16px 24px; }
-.venue { color: var(--accent); font-weight: 600; font-size: 14px; letter-spacing: .04em; text-transform: uppercase; margin: 0 0 8px; }
 h1 { font-size: clamp(28px, 4.4vw, 44px); line-height: 1.12; letter-spacing: -.02em; margin: 0 0 16px; max-width: 22ch; text-wrap: balance; }
+.hero-title { max-width: none; }
+.hero-title span { display: block; }
+.title-name { font-size: clamp(48px, 8vw, 80px); line-height: 1; letter-spacing: -.03em; margin-bottom: 8px; }
+.title-sub { max-width: 30ch; text-wrap: balance; }
 .authors { margin: 0; font-size: 17px; }
 .affil { margin: 4px 0 20px; color: var(--text-2); font-size: 14px; }
 .links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
