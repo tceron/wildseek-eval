@@ -1,10 +1,18 @@
-# wildseek-eval
+# WildSeek: Evaluating Language Models for Information-Seeking
 
-Code and analysis for the WildSeek evaluation study.
+Code and analysis for **WildSeek** (EMNLP 2026), a manually annotated dataset of 3,077 real-world information-seeking queries and an evaluation framework for the reliability, fairness and safety of LLM responses.
+
+## 🔎 Explore the dataset and findings online
+
+**👉 https://tceron.github.io/wildseek-eval/**
+
+## Resources
+
+[Paper](https://arxiv.org/abs/2608.30683) · [Data (OSF)](https://osf.io/hxvj2) · [Classifiers (Hugging Face)](https://huggingface.co/tceron)
 
 ## Data
 
-All data used in this study is available on OSF:
+All model responses generated in this study are available on OSF:
 
 **https://osf.io/hxvj2**
 
@@ -20,18 +28,8 @@ Download the files from that project page before running any of the scripts or n
 - `process_data.py` / `utils.py` — shared data processing utilities
 - `prompt_claude.py` / `prompt_gpt.py` / `prompt_gemini.py` / `prompt_hf_models.py` / `prompt_models.py` — scripts for querying different model providers
 - `scrape_mbfc.py` — scrapes source credibility ratings (Media Bias/Fact Check)
-- `analyze_search_results.ipynb`, `credibility.ipynb`, `safety_analysis_results.ipynb`, `safety_eval.ipynb`, `topic_analysis.ipynb`, `visualize_results.ipynb` — analysis and visualization notebooks
-
-## Project website
-
-`docs/` holds a static site (served with GitHub Pages) for exploring the results and annotations. It has no build step. To refresh its data after changing the CSVs:
-
-```bash
-python docs/build_data.py          # writes docs/data/*.json
-python -m http.server -d docs      # preview at http://localhost:8000
-```
-
-To publish, open the repo's **Settings → Pages**, choose *Deploy from a branch*, then select `main` and `/docs`.
+- `credibility.ipynb`, `safety_analysis_results.ipynb`, `topic_analysis.ipynb`, `visualize_results.ipynb` — analysis and visualization notebooks
+- `docs/` — source of the project website (see below)
 
 ## Citation
 

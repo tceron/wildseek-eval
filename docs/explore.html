@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explore WildSeek</title>
+<meta name="description" content="Search and filter the 3,077 annotated WildSeek queries by risk-sensitive domain, query type and source corpus (EMNLP 2026).">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='42' cy='42' r='26' fill='none' stroke='%232a78d6' stroke-width='12'/><line x1='62' y1='62' x2='88' y2='88' stroke='%232a78d6' stroke-width='12' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav class="wrap nav">
+    <a class="brand" href="index.html">WildSeek</a>
+    <div class="nav-links">
+      <a href="explore.html" aria-current="page">Explore WildSeek</a>
+      <a href="framework.html">Evaluation Framework</a>
+      <a href="intents.html">User intents</a>
+      <a href="classifiers.html">Classifiers</a>
+      <a href="team.html">Team</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">◐</button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="wrap block" id="explore">
+    <h1>Explore WildSeek</h1>
+    <p class="section-lede">Browse the 3,077 annotated queries by risk-sensitive domain, query type and source corpus. See the <a href="index.html#dataset">dataset description</a> for how each label is defined.</p>
+
+    <div class="dash card">
+      <div class="dash-head">
+        <h3>Explore the annotated queries</h3>
+        <p class="caption">Click a cell, row, column or bar to filter. Every panel updates to match the current selection.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Dataset filters">
+        <label class="grow">Search <input type="search" id="dSearch" placeholder="e.g. insurance, allergy, Bible…"></label>
+        <label>Domain <select id="dDomain"></select></label>
+        <label>Query type
+          <select id="dType"><option value="all">All</option><option>Factoid</option><option>Analytical</option></select>
+        </label>
+        <label>Source <select id="dSource"></select></label>
+        <button type="button" class="btn small" id="dClear" hidden>Clear filters</button>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dpanel wide">
+          <h4>Domain × query type</h4>
+          <div class="table-scroll"><table class="matrix" id="dMatrix"></table></div>
+        </div>
+        <div class="dpanel wide">
+          <h4>Source corpus</h4>
+          <div class="legend" id="dSrcLegend"></div>
+          <div id="dSources" class="stack-bars clickable"></div>
+        </div>
+      </div>
+
+      <div class="dash-list-head">
+        <p class="count-line" id="dCount"></p>
+        <button type="button" class="btn small" id="dDownload">Download selection (CSV)</button>
+      </div>
+      <ul class="qlist" id="dList"></ul>
+      <div class="pager" id="dPager"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap footer">
+  <p>Queries come from real user conversations and may contain offensive or sensitive content.</p>
+</footer>
+
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WildSeek Classifiers</title>
+<meta name="description" content="ModernBERT classifiers for user intent, risk-sensitive domain and open-endedness, fine-tuned on WildSeek (EMNLP 2026).">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='42' cy='42' r='26' fill='none' stroke='%232a78d6' stroke-width='12'/><line x1='62' y1='62' x2='88' y2='88' stroke='%232a78d6' stroke-width='12' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav class="wrap nav">
+    <a class="brand" href="index.html">WildSeek</a>
+    <div class="nav-links">
+      <a href="explore.html">Explore WildSeek</a>
+      <a href="framework.html">Evaluation Framework</a>
+      <a href="intents.html">User intents</a>
+      <a href="classifiers.html" aria-current="page">Classifiers</a>
+      <a href="team.html">Team</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">◐</button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="wrap block" id="classifiers">
+    <h2>Classifiers</h2>
+    <p class="section-lede">These are ModernBERT-large models (max length 256), fine-tuned on WildSeek with 5-fold cross-validation. Scores are macro-F1 on the held-out test set.</p>
+    <div class="clf-grid">
+      <a class="card clf" href="https://huggingface.co/tceron/info-seek-classifier"><span class="clf-name">info-seek-classifier</span><span class="clf-score">0.87</span><span class="clf-desc">User intent · 5 classes</span></a>
+      <a class="card clf" href="https://huggingface.co/tceron/high-risk-classifier"><span class="clf-name">high-risk-classifier</span><span class="clf-score">0.80</span><span class="clf-desc">Risk-sensitive domain · 7 classes</span></a>
+      <a class="card clf" href="https://huggingface.co/tceron/open-endedness-classifier"><span class="clf-name">open-endedness-classifier</span><span class="clf-score">0.83</span><span class="clf-desc">Factoid vs. analytical</span></a>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap footer">
+  <p>Queries come from real user conversations and may contain offensive or sensitive content.</p>
+</footer>
+
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

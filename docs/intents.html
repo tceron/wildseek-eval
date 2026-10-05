@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WildSeek User Intents</title>
+<meta name="description" content="Manually labelled user-intent annotations used to train the WildSeek intent classifier (EMNLP 2026).">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='42' cy='42' r='26' fill='none' stroke='%232a78d6' stroke-width='12'/><line x1='62' y1='62' x2='88' y2='88' stroke='%232a78d6' stroke-width='12' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav class="wrap nav">
+    <a class="brand" href="index.html">WildSeek</a>
+    <div class="nav-links">
+      <a href="explore.html">Explore WildSeek</a>
+      <a href="framework.html">Evaluation Framework</a>
+      <a href="intents.html" aria-current="page">User intents</a>
+      <a href="classifiers.html">Classifiers</a>
+      <a href="team.html">Team</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">◐</button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="wrap block" id="intents">
+    <h2>User-intent annotations</h2>
+    <p class="section-lede">3,907 manually labelled conversation turns used to train the user-intent classifier (inter-annotator Cohen's κ = 0.80). Long prompts are truncated.</p>
+    <div class="filters" role="group" aria-label="Intent filters">
+      <label class="grow">Search <input type="search" id="iSearch" placeholder="Search prompts…"></label>
+      <label>Intent <select id="iLabel"></select></label>
+      <label>Source <select id="iSource"></select></label>
+    </div>
+    <div id="iSummary" class="hbars compact"></div>
+    <p class="count-line" id="iCount"></p>
+    <ul class="qlist" id="iList"></ul>
+    <div class="pager" id="iPager"></div>
+  </section>
+</main>
+
+<footer class="wrap footer">
+  <p>Queries come from real user conversations and may contain offensive or sensitive content.</p>
+</footer>
+
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

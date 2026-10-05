@@ -66,7 +66,6 @@ const DOMAIN_DEFS = [
   ["Moral Values and Religion", "Ethical, spiritual or value-based questions, relationships and interpersonal conflicts."],
   ["Other", "Information-seeking queries that fit none of the categories above."],
 ];
-const LENGTH_BINS = [[1, 5], [6, 10], [11, 15], [16, 20], [21, 30], [31, 40], [41, Infinity]];
 const MODEL_COLOR = { "GPT-5.4": "--s-gpt", "Gemini-3.1": "--s-gemini", "Claude-4.6": "--s-claude", "Llama-3.3-70B": "--s-llama" };
 const PAGE = 20;
 
@@ -168,15 +167,6 @@ function renderStatic() {
     `<span class="lab">${d}</span><div class="stack"><span style="width:${f}%;background:var(--factoid)">${f.toFixed(1)}%</span><span style="width:${100 - f}%;background:var(--analytical)">${(100 - f).toFixed(1)}%</span></div>`
   ).join("");
 
-  // Reliability table
-  const fmt = (v, f) => f === "pct" ? v.toFixed(1) + "%" : f === "int" ? fmtN(v) : v.toFixed(3);
-  $("relTable").innerHTML =
-    `<thead><tr><th>Criterion</th><th class="l">Query type</th><th class="l">Search</th><th>GPT-5.4</th><th>Gemini-3.1</th><th>Claude Sonnet 4.6</th></tr></thead><tbody>` +
-    RELIABILITY.map(([lab, qt, s, vals, best, worst, f, sig]) =>
-      `<tr><td>${lab}</td><td class="l">${qt}</td><td class="l">${s ? "with" : "without"}</td>` +
-      vals.map((v, i) => `<td class="${i === best ? "best" : ""}">${fmt(v, f)}${sig === i ? "*" : ""}${i === worst ? ' <span class="worst" aria-label="worst">×</span>' : ""}</td>`).join("") +
-      "</tr>").join("") + "</tbody>";
-
   // Spotlight: factoid vs analytical dumbbell
   const dmax = 25;
   $("spotChart").innerHTML = QTYPE_GAP.map(([c, f, a, sig]) => {
@@ -193,17 +183,19 @@ function renderStatic() {
     const [c, f, a, sig] = QTYPE_GAP.find((r) => r[0] === el.dataset.c);
     return `<div class="t-title">${CRITERIA[c][0]}</div><div class="t-row">Factoid ${f.toFixed(2)}%<br>Analytical ${a.toFixed(2)}%<br>Gap ${(a - f >= 0 ? "+" : "")}${(a - f).toFixed(2)} pp${sig ? "<br>Significant for at least one model" : "<br>Not significant"}</div>`;
   }));
-  $("spotCompare").addEventListener("click", () => {
-    $("fType").value = "compare";
-    $("fType").dispatchEvent(new Event("change"));
-    $("failures").scrollIntoView({ behavior: "smooth" });
-  });
+  $("spotCompare").addEventListener("click", () => { location.href = "framework.html#compare"; });
 
-  $("copyBib").addEventListener("click", async (e) => {
-    try { await navigator.clipboard.writeText($("bibtex").textContent); e.target.textContent = "Copied"; }
-    catch (err) { e.target.textContent = "Select & copy"; }
-    setTimeout(() => (e.target.textContent = "Copy"), 1500);
-  });
+}
+
+// ---------- Reliability table ----------
+function renderReliability() {
+  const fmt = (v, f) => f === "pct" ? v.toFixed(1) + "%" : f === "int" ? fmtN(v) : v.toFixed(3);
+  $("relTable").innerHTML =
+    `<thead><tr><th>Criterion</th><th class="l">Query type</th><th class="l">Search</th><th>GPT-5.4</th><th>Gemini-3.1</th><th>Claude Sonnet 4.6</th></tr></thead><tbody>` +
+    RELIABILITY.map(([lab, qt, s, vals, best, worst, f, sig]) =>
+      `<tr><td>${lab}</td><td class="l">${qt}</td><td class="l">${s ? "with" : "without"}</td>` +
+      vals.map((v, i) => `<td class="${i === best ? "best" : ""}">${fmt(v, f)}${sig === i ? "*" : ""}${i === worst ? ' <span class="worst" aria-label="worst">×</span>' : ""}</td>`).join("") +
+      "</tr>").join("") + "</tbody>";
 }
 
 // ---------- Failure-rate explorer ----------
@@ -320,29 +312,45 @@ function initFailures(Q, meta) {
   }
 
   ["fType", "fDomain", "fSource", "fLlama"].forEach((id) => $(id).addEventListener("change", render));
+  if (location.hash === "#compare") {
+    $("fType").value = "compare";
+    $("failures").scrollIntoView();
+  }
   render();
 }
 
 // ---------- Dataset dashboard ----------
-function initDataset(Q) {
-  const words = (s) => s.trim().split(/\s+/).length;
-  for (const q of Q) q.w = words(q.q);
-  const count = (arr, f) => arr.reduce((n, x) => n + (f(x) ? 1 : 0), 0);
+const count = (arr, f) => arr.reduce((n, x) => n + (f(x) ? 1 : 0), 0);
+const sortedDomains = (Q) => DOMAIN_DEFS.map(([d]) => d)
+  .sort((a, b) => (a === "Other") - (b === "Other") || count(Q, (q) => q.d === b) - count(Q, (q) => q.d === a));
+const sortedSources = (Q) => [...new Set(Q.map((q) => q.s))].sort((a, b) => count(Q, (q) => q.s === b) - count(Q, (q) => q.s === a));
+
+function initOverview(Q) {
   const nAnalytical = count(Q, (q) => q.t === "Analytical");
-  const sortedW = Q.map((q) => q.w).sort((a, b) => a - b);
-  const domains = DOMAIN_DEFS.map(([d]) => d)
-    .sort((a, b) => (a === "Other") - (b === "Other") || count(Q, (q) => q.d === b) - count(Q, (q) => q.d === a));
-  const sources = [...new Set(Q.map((q) => q.s))].sort((a, b) => count(Q, (q) => q.s === b) - count(Q, (q) => q.s === a));
-  const types = ["Factoid", "Analytical"];
+  const sources = sortedSources(Q);
 
   $("dsStats").innerHTML = [
     [fmtN(Q.length), "annotated queries", "from real user–LLM conversations"],
     [sources.length, "source corpora", sources.join(" · ")],
     ["6 + 1", "risk-sensitive domains", "plus Other"],
     [`${Math.round(nAnalytical / Q.length * 100)}%`, "analytical", `${fmtN(nAnalytical)} analytical · ${fmtN(Q.length - nAnalytical)} factoid`],
-    [sortedW[Math.floor(sortedW.length / 2)], "words, median length", `90% are ≤ ${sortedW[Math.floor(sortedW.length * 0.9)]} words`],
   ].map(([n, l, s]) => `<div class="stat"><span class="stat-num">${n}</span><span class="stat-label">${l}</span><span class="stat-sub">${esc(s)}</span></div>`).join("");
   $("domainDefs").innerHTML = DOMAIN_DEFS.map(([d, t]) => `<dt>${d}</dt><dd>${t}</dd>`).join("");
+
+  // Queries per risk-sensitive domain
+  const counts = sortedDomains(Q).map((d) => [d, count(Q, (q) => q.d === d)]);
+  const max = Math.max(1, ...counts.map(([, n]) => n));
+  $("dcTotal").textContent = fmtN(Q.length);
+  $("dcBars").innerHTML = counts.map(([d, n]) =>
+    `<span class="lab">${d}</span><div class="track"><div class="bar${d === "Other" ? " muted" : ""}" style="width:${n / max * 100}%"></div></div><span class="val">${fmtN(n)}<small>${(n / Q.length * 100).toFixed(1)}%</small></span>`
+  ).join("");
+}
+
+// ---------- Explore page ----------
+function initExplore(Q) {
+  const domains = sortedDomains(Q);
+  const sources = sortedSources(Q);
+  const types = ["Factoid", "Analytical"];
 
   fillSelect($("dDomain"), domains);
   fillSelect($("dSource"), sources);
@@ -402,19 +410,6 @@ function initDataset(Q) {
     }));
   }
 
-  function renderLength(rows) {
-    const counts = LENGTH_BINS.map(([lo, hi]) => count(rows, (q) => q.w >= lo && q.w <= hi));
-    const max = Math.max(1, ...counts);
-    const label = ([lo, hi]) => hi === Infinity ? `${lo}+` : `${lo}–${hi}`;
-    $("dLength").innerHTML = counts.map((n, i) =>
-      `<div class="col" data-i="${i}"><span class="vv">${fmtN(n)}</span><div class="vbar" style="height:${n / max * 82}%"></div></div>`).join("");
-    $("dLength").nextElementSibling?.classList.contains("vlabels") || $("dLength").insertAdjacentHTML("afterend", `<div class="vlabels">${LENGTH_BINS.map((b) => `<span>${label(b)}</span>`).join("")}</div>`);
-    $("dLength").querySelectorAll(".col").forEach((el) => bindTip(el, () => {
-      const i = +el.dataset.i;
-      return `<div class="t-title">${label(LENGTH_BINS[i])} words</div><div class="t-row">${fmtN(counts[i])} queries (${rows.length ? Math.round(counts[i] / rows.length * 100) : 0}%)</div>`;
-    }));
-  }
-
   const highlight = (text) => {
     if (!st.term) return esc(text);
     const re = new RegExp(st.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
@@ -430,8 +425,7 @@ function initDataset(Q) {
     renderItem: (q) => `<li class="qitem"><p class="qtext">${highlight(q.q)}</p><div class="qmeta">` +
       `<span class="chip link" data-f="domain" data-v="${esc(q.d)}" title="Filter by domain">${esc(q.d)}</span>` +
       `<span class="chip link" data-f="type" data-v="${q.t}" title="Filter by query type">${q.t}</span>` +
-      `<span class="chip link" data-f="source" data-v="${q.s}" title="Filter by source">${q.s}</span>` +
-      `<span class="chip ok">${q.w} words</span></div></li>`,
+      `<span class="chip link" data-f="source" data-v="${q.s}" title="Filter by source">${q.s}</span></div></li>`,
   });
   let current = Q;
 
@@ -439,7 +433,6 @@ function initDataset(Q) {
     current = Q.filter((q) => match(q));
     renderMatrix();
     renderSources();
-    renderLength(current);
     list.set(current);
     $("dClear").hidden = st.domain === "all" && st.type === "all" && st.source === "all" && !st.term;
   }
@@ -583,15 +576,27 @@ function initIntents(I) {
 }
 
 // ---------- Boot ----------
-renderStatic();
-Promise.all(["data/queries.json", "data/meta.json", "data/intents.json"].map((u) => fetch(u).then((r) => r.json())))
-  .then(([Q, meta, I]) => {
-    initDataset(Q);
-    initFailures(Q, meta);
-    initBrowse(Q, meta);
-    initIntents(I);
+$("copyBib")?.addEventListener("click", async (e) => {
+  try { await navigator.clipboard.writeText($("bibtex").textContent); e.target.textContent = "Copied"; }
+  catch (err) { e.target.textContent = "Select & copy"; }
+  setTimeout(() => (e.target.textContent = "Copy"), 1500);
+});
+const page = $("failGrid") ? "results" : $("iList") ? "intents" : $("dList") ? "explore" : $("dsStats") ? "home" : null;
+if (page === "home") renderStatic();
+if (page === "results") renderReliability();
+const files = page === "intents" ? ["data/intents.json"] : ["data/queries.json", "data/meta.json"];
+if (page) Promise.all(files.map((u) => fetch(u).then((r) => r.json())))
+  .then((data) => {
+    if (page === "intents") return initIntents(data[0]);
+    const [Q, meta] = data;
+    if (page === "results") {
+      initFailures(Q, meta);
+      return initBrowse(Q, meta);
+    }
+    if (page === "explore") return initExplore(Q);
+    initOverview(Q);
   })
   .catch((err) => {
     console.error(err);
-    for (const id of ["dList", "failGrid", "bList", "iList"]) $(id).innerHTML = `<p class="empty">Could not load data (${esc(err.message)}). If you opened this file directly, serve the folder instead: <code>python -m http.server -d docs</code>.</p>`;
+    for (const id of ["dcBars", "dList", "failGrid", "bList", "iList"]) if ($(id)) $(id).innerHTML = `<p class="empty">Could not load data (${esc(err.message)}). If you opened this file directly, serve the folder instead: <code>python -m http.server -d docs</code>.</p>`;
   });
