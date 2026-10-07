@@ -28,7 +28,7 @@
     <h1 class="hero-title"><span class="title-name">WildSeek</span><span class="title-sub">Evaluating Language Models for Information-Seeking</span></h1>
     <p class="lede">WildSeek is a manually annotated dataset of 3,077 information-seeking queries taken from real user–LLM conversations. Each query is labelled with a <strong>risk-sensitive domain</strong> and an <strong>open-endedness type</strong> (factoid or analytical). We used it to train classifiers and ran them over 1.8M+ real queries. Alongside the dataset, we propose an <a href="framework.html#framework">evaluation framework</a> for LLMs in the context of information seeking, which scores responses for <strong>reliability</strong>, <strong>fairness</strong> and <strong>safety</strong>. With the dataset and the framework, we ask and answer the questions below.</p>
     <div class="qa-grid">
-      <article class="qa">
+      <article class="qa" style="--c:var(--icon-intent)">
         <p class="qa-q">How often do people use LLMs to seek information?</p>
         <p class="qa-a">~40%</p>
         <p class="qa-s">of user turns are information-seeking.</p>
@@ -38,7 +38,7 @@
           <a href="#queries" class="qa-link">See the in-the-wild figures →</a>
         </details>
       </article>
-      <article class="qa">
+      <article class="qa" style="--c:var(--icon-domain)">
         <p class="qa-q">How much of that information seeking is risk-sensitive?</p>
         <p class="qa-a">37%</p>
         <p class="qa-s">of information-seeking queries touch a risk-sensitive domain.</p>
@@ -48,7 +48,7 @@
           <a href="#queries" class="qa-link">See the domain breakdown →</a>
         </details>
       </article>
-      <article class="qa">
+      <article class="qa" style="--c:var(--icon-open)">
         <p class="qa-q">Do people ask for facts or for analysis?</p>
         <p class="qa-a">60%</p>
         <p class="qa-s">of information-seeking queries are analytical.</p>
@@ -58,7 +58,7 @@
           <a href="#queries" class="qa-link">See factoid vs. analytical by domain →</a>
         </details>
       </article>
-      <article class="qa">
+      <article class="qa" style="--c:var(--icon-safety)">
         <p class="qa-q">Do analytical queries get less safe answers?</p>
         <p class="qa-a">+4.0 pp</p>
         <p class="qa-s">Yes. Analytical queries fail more often than factoid ones.</p>
@@ -76,7 +76,7 @@
           <button type="button" class="btn small" id="spotCompare">Compare by model and domain →</button>
         </details>
       </article>
-      <article class="qa">
+      <article class="qa" style="--c:var(--icon-safety)">
         <p class="qa-q">What goes wrong most often?</p>
         <ol class="qa-top" aria-label="Top three failures by average failure rate">
           <li><span class="qa-rank">1</span><span class="qa-name">Overreliance</span><span class="qa-val">14.3%</span><span class="qa-bar"><span style="width:100%"></span></span></li>
@@ -90,7 +90,7 @@
           <a href="framework.html#failures" class="qa-link">Explore failure rates →</a>
         </details>
       </article>
-      <article class="qa">
+      <article class="qa" style="--c:var(--icon-reliability)">
         <p class="qa-q">Does web search make answers better?</p>
         <p class="qa-a">Not reliably</p>
         <p class="qa-s">Only Gemini-3.1 clearly benefits from search.</p>
@@ -100,7 +100,7 @@
           <a href="framework.html#reliability" class="qa-link">See reliability results →</a>
         </details>
       </article>
-      <article class="qa">
+      <article class="qa" style="--c:var(--icon-fairness)">
         <p class="qa-q">Are credible sources also diverse?</p>
         <p class="qa-a">Not necessarily</p>
         <p class="qa-s">The model citing the most credible sources draws on the fewest web domains.</p>

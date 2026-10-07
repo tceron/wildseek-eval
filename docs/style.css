@@ -125,7 +125,7 @@ h1 { font-size: clamp(28px, 4.4vw, 44px); line-height: 1.12; letter-spacing: -.0
 .lede { max-width: 72ch; color: var(--text-2); font-size: 17px; margin: 0 0 28px; }
 .qa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; align-items: stretch; }
 .qa-grid:not(:has(.qa-more[open])) { grid-auto-rows: 1fr; }
-.qa { display: flex; flex-direction: column; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 12px; box-shadow: var(--shadow); }
+.qa { display: flex; flex-direction: column; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--c, var(--accent)); border-radius: 12px; box-shadow: var(--shadow); }
 .qa:has(.qa-more[open]) { grid-column: 1 / -1; }
 .qa p { margin: 0; }
 .qa-q { font-size: 14px; font-weight: 600; color: var(--text-2); min-height: 2.8em; }
