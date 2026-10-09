@@ -26,7 +26,7 @@
 <main id="top">
   <section class="hero wrap">
     <h1 class="hero-title"><span class="title-name">WildSeek</span><span class="title-sub">Evaluating Language Models for Information-Seeking</span></h1>
-    <p class="lede">WildSeek is a manually annotated dataset of 3,077 information-seeking queries taken from real user–LLM conversations. Each query is labelled with a <strong>risk-sensitive domain</strong> and an <strong>open-endedness type</strong> (factoid or analytical). We used it to train classifiers and ran them over 1.8M+ real queries. Alongside the dataset, we propose an <a href="framework.html#framework">evaluation framework</a> for LLMs in the context of information seeking, which scores responses for <strong>reliability</strong>, <strong>fairness</strong> and <strong>safety</strong>. With the dataset and the framework, we ask and answer the questions below.</p>
+    <p class="lede">WildSeek is a manually annotated dataset of 3,077 information-seeking queries taken from real user–LLM conversations. Each query is labelled with a <strong>risk-sensitive domain</strong> and an <strong>open-endedness type</strong> (factoid or analytical). We used it to train classifiers and ran them over 1.8M+ real queries. Alongside the dataset, we propose an <a href="framework.html#framework">evaluation framework</a> for LLM-generated answers in the context of information seeking, which scores responses for <strong>reliability</strong>, <strong>fairness</strong> and <strong>safety</strong>. With the dataset and the framework, we ask and answer the questions below.</p>
     <div class="qa-grid">
       <article class="qa" style="--c:var(--icon-intent)">
         <p class="qa-q">How often do people use LLMs to seek information?</p>
@@ -34,7 +34,7 @@
         <p class="qa-s">of user turns are information-seeking.</p>
         <details class="qa-more">
           <summary>Details</summary>
-          <p>Information seeking is the most common use: it accounts for about 40% of user turns, from 42% in LMSYS-Chat-1M to 74% in SES.</p>
+          <p>Information seeking is the most common use: it accounts for about 40% of user turns, from 42% to 74% depending on the dataset.</p>
           <a href="#queries" class="qa-link">See the in-the-wild figures →</a>
         </details>
       </article>

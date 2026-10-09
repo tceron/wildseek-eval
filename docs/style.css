@@ -124,9 +124,10 @@ h1 { font-size: clamp(28px, 4.4vw, 44px); line-height: 1.12; letter-spacing: -.0
 .btn.small { padding: 4px 10px; font-size: 13px; }
 .lede { max-width: 72ch; color: var(--text-2); font-size: 17px; margin: 0 0 28px; }
 .qa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; align-items: stretch; }
-.qa-grid:not(:has(.qa-more[open])) { grid-auto-rows: 1fr; }
+.qa-grid:not(.has-panel) { grid-auto-rows: 1fr; }
+.qa-grid.has-panel .qa { height: var(--tile-h); }
 .qa { display: flex; flex-direction: column; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--c, var(--accent)); border-radius: 12px; box-shadow: var(--shadow); }
-.qa:has(.qa-more[open]) { grid-column: 1 / -1; }
+.qa.open { border-color: var(--c, var(--accent)); }
 .qa p { margin: 0; }
 .qa-q { font-size: 14px; font-weight: 600; color: var(--text-2); min-height: 2.8em; }
 .qa .qa-a { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; margin-top: 8px; color: var(--text); font-variant-numeric: tabular-nums; }
@@ -140,9 +141,10 @@ h1 { font-size: clamp(28px, 4.4vw, 44px); line-height: 1.12; letter-spacing: -.0
 .qa-bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
 .qa-more { margin-top: auto; padding-top: 10px; }
 .qa-more summary { cursor: pointer; font-size: 13px; color: var(--accent); width: fit-content; }
-.qa .qa-more > p { margin-top: 8px; font-size: 14.5px; color: var(--text-2); max-width: 75ch; }
-.qa-more .spot-chart { margin-top: 14px; max-width: 640px; }
-.qa-more .btn, .qa-link { display: inline-block; margin-top: 12px; }
+.qa-panel { grid-column: 1 / -1; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--c, var(--accent)); border-radius: 12px; box-shadow: var(--shadow); }
+.qa-panel > p { margin: 0; font-size: 14.5px; color: var(--text-2); max-width: 75ch; }
+.qa-panel .spot-chart { margin-top: 14px; max-width: 640px; }
+.qa-panel .btn, .qa-link { display: inline-block; margin-top: 12px; }
 .qa-link { font-size: 13px; text-decoration: none; }
 .spot-chart { min-width: 0; }
 .spot-chart .caption { margin: 8px 0 0; }
@@ -328,7 +330,7 @@ input[type=search] { width: 100%; }
 .fwm-dim h3 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
 .fwm-dim p { margin: 4px 0 6px; font-size: 13px; color: var(--text-2); }
 .fwm-count { font-size: 12px; color: var(--text-3); }
-.fwm-crits { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; align-content: start; align-items: start; }
+.fwm-crits { position: relative; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; align-content: start; align-items: start; }
 .fwm-crit { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border)); border-left: 3px solid var(--accent); border-radius: 8px; background: color-mix(in srgb, var(--accent) 5%, var(--surface)); color: var(--text); }
 .fwm-name { font-weight: 600; font-size: 15px; }
 .fwm-dir { color: var(--accent); font-weight: 700; margin-left: 2px; }
@@ -336,10 +338,11 @@ input[type=search] { width: 100%; }
 .fwm-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
 .fwm-tags span { font-size: 11px; border: 1px solid var(--border); border-radius: 999px; padding: 0 7px; color: var(--text-2); background: var(--surface); }
 .fwm-key { margin: 12px 0 0; }
-.fwm-crit:has(.fwm-more[open]) { grid-column: 1 / -1; }
+.fwm-crit.open { border-color: var(--accent); }
+.fwm-panel { position: absolute; left: 0; right: 0; z-index: 5; box-shadow: var(--shadow); padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border)); border-left: 3px solid var(--accent); border-radius: 8px; background: var(--surface); }
 .fwm-more { margin-top: 6px; }
 .fwm-more summary { cursor: pointer; font-size: 12.5px; color: var(--accent); width: fit-content; }
-.fwm-more p { margin: 6px 0 0; font-size: 14px; color: var(--text-2); }
+.fwm-panel p { margin: 0; font-size: 14px; color: var(--text-2); }
 .fw-setup { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 0 0 20px; align-items: start; }
 .fw-setup p { margin: 6px 0 0; font-size: 14px; color: var(--text-2); }
 .fw-setup summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }

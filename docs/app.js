@@ -185,6 +185,59 @@ function renderStatic() {
   }));
   $("spotCompare").addEventListener("click", () => { location.href = "framework.html#compare"; });
 
+  initDetailPanels(document.querySelector(".qa-grid"), ".qa", "qa-panel");
+}
+
+// Expandable tiles: show a tile's <details> content in a full-width panel below the tile's row, so the tiles themselves stay put.
+// With overlay, the panel floats over the rows below instead of pushing them down.
+function initDetailPanels(grid, tileSel, panelClass, { overlay = false } = {}) {
+  const panel = document.createElement("div");
+  panel.className = panelClass;
+  let open = null;
+  const place = () => {
+    const tile = open.closest(tileSel);
+    if (overlay) {
+      grid.append(panel);
+      panel.style.top = tile.offsetTop + tile.offsetHeight + 6 + "px";
+      return;
+    }
+    panel.remove();
+    grid.classList.remove("has-panel");
+    grid.style.setProperty("--tile-h", tile.offsetHeight + "px");
+    const last = [...grid.querySelectorAll(tileSel)].filter((t) => t.offsetTop === tile.offsetTop).pop();
+    last.after(panel);
+    grid.classList.add("has-panel");
+  };
+  const close = () => {
+    const d = open;
+    open = null;
+    d.append(...panel.childNodes);
+    panel.remove();
+    grid.classList.remove("has-panel");
+    d.closest(tileSel).classList.remove("open");
+    d.open = false;
+  };
+  // Handle the summary click ourselves so the content never renders inside the tile, even for a frame
+  grid.querySelectorAll(`${tileSel} > details > summary`).forEach((sum) => sum.addEventListener("click", (e) => {
+    e.preventDefault();
+    const d = sum.parentElement;
+    if (d === open) return close();
+    if (open) close();
+    open = d;
+    const tile = d.closest(tileSel);
+    tile.classList.add("open");
+    panel.style.cssText = tile.style.cssText;
+    panel.append(...[...d.childNodes].filter((n) => n.nodeName !== "SUMMARY"));
+    d.open = true;
+    place();
+  }));
+  window.addEventListener("resize", debounce(() => open && place()));
+  if (overlay) {
+    document.addEventListener("click", (e) => {
+      if (open && !panel.contains(e.target) && !open.closest(tileSel).contains(e.target)) close();
+    });
+    document.addEventListener("keydown", (e) => { if (open && e.key === "Escape") close(); });
+  }
 }
 
 // ---------- Reliability table ----------
@@ -584,6 +637,7 @@ $("copyBib")?.addEventListener("click", async (e) => {
 const page = $("failGrid") ? "results" : $("iList") ? "intents" : $("dList") ? "explore" : $("dsStats") ? "home" : null;
 if (page === "home") renderStatic();
 if (page === "results") renderReliability();
+document.querySelectorAll(".fwm-crits").forEach((g) => initDetailPanels(g, ".fwm-crit", "fwm-panel", { overlay: true }));
 const files = page === "intents" ? ["data/intents.json"] : ["data/queries.json", "data/meta.json"];
 if (page) Promise.all(files.map((u) => fetch(u).then((r) => r.json())))
   .then((data) => {
