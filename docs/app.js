@@ -189,18 +189,12 @@ function renderStatic() {
 }
 
 // Expandable tiles: show a tile's <details> content in a full-width panel below the tile's row, so the tiles themselves stay put.
-// With overlay, the panel floats over the rows below instead of pushing them down.
-function initDetailPanels(grid, tileSel, panelClass, { overlay = false } = {}) {
+function initDetailPanels(grid, tileSel, panelClass) {
   const panel = document.createElement("div");
   panel.className = panelClass;
   let open = null;
   const place = () => {
     const tile = open.closest(tileSel);
-    if (overlay) {
-      grid.append(panel);
-      panel.style.top = tile.offsetTop + tile.offsetHeight + 6 + "px";
-      return;
-    }
     panel.remove();
     grid.classList.remove("has-panel");
     grid.style.setProperty("--tile-h", tile.offsetHeight + "px");
@@ -232,12 +226,6 @@ function initDetailPanels(grid, tileSel, panelClass, { overlay = false } = {}) {
     place();
   }));
   window.addEventListener("resize", debounce(() => open && place()));
-  if (overlay) {
-    document.addEventListener("click", (e) => {
-      if (open && !panel.contains(e.target) && !open.closest(tileSel).contains(e.target)) close();
-    });
-    document.addEventListener("keydown", (e) => { if (open && e.key === "Escape") close(); });
-  }
 }
 
 // ---------- Reliability table ----------
@@ -634,12 +622,11 @@ $("copyBib")?.addEventListener("click", async (e) => {
   catch (err) { e.target.textContent = "Select & copy"; }
   setTimeout(() => (e.target.textContent = "Copy"), 1500);
 });
-const page = $("failGrid") ? "results" : $("iList") ? "intents" : $("dList") ? "explore" : $("dsStats") ? "home" : null;
+const page = $("failGrid") ? "results" : $("iList") ? "intents" : $("dList") ? "explore" : $("intentHeat") ? "home" : null;
 if (page === "home") renderStatic();
 if (page === "results") renderReliability();
-document.querySelectorAll(".fwm-crits").forEach((g) => initDetailPanels(g, ".fwm-crit", "fwm-panel", { overlay: true }));
 const files = page === "intents" ? ["data/intents.json"] : ["data/queries.json", "data/meta.json"];
-if (page) Promise.all(files.map((u) => fetch(u).then((r) => r.json())))
+if (page && page !== "home") Promise.all(files.map((u) => fetch(u).then((r) => r.json())))
   .then((data) => {
     if (page === "intents") return initIntents(data[0]);
     const [Q, meta] = data;
@@ -647,8 +634,8 @@ if (page) Promise.all(files.map((u) => fetch(u).then((r) => r.json())))
       initFailures(Q, meta);
       return initBrowse(Q, meta);
     }
-    if (page === "explore") return initExplore(Q);
     initOverview(Q);
+    initExplore(Q);
   })
   .catch((err) => {
     console.error(err);

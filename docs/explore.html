@@ -27,9 +27,53 @@
 
   <section class="wrap block" id="explore">
     <h1>Explore WildSeek</h1>
-    <p class="section-lede">Browse the 3,077 annotated queries by risk-sensitive domain, query type and source corpus. See the <a href="index.html#dataset">dataset description</a> for how each label is defined.</p>
+    <p class="section-lede">Browse the 3,077 annotated queries by risk-sensitive domain, query type and source corpus. See the <a href="#dataset">dataset description</a> below for how each label is defined.</p>
 
-    <div class="dash card">
+    <div id="dataset">
+      <h2>The WildSeek dataset</h2>
+      <p class="section-lede">These are 3,077 information-seeking queries sampled from four corpora of real human–LLM conversations. Annotators labelled each one by hand with the risk-sensitive domain it touches and whether it asks for a fact or for analysis.</p>
+
+      <div class="stats" id="dsStats"></div>
+
+      <div class="card domain-count">
+        <div class="dc-head">
+          <h3>Queries per risk-sensitive domain</h3>
+          <p class="dc-total"><span id="dcTotal"></span> queries in total</p>
+        </div>
+        <div id="dcBars" class="hbars"></div>
+        <a href="#browse" class="anno-link">Explore the annotated queries →</a>
+      </div>
+
+      <div class="anno-grid">
+        <div class="card anno">
+          <span class="anno-step">Layer 1</span>
+          <h3 class="icon-head"><svg class="dim-icon" style="--c:var(--icon-intent)" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle class="bg" cx="12" cy="12" r="11"/><circle cx="10.5" cy="10.5" r="4.6"/><path d="M14 14l4.5 4.5"/></svg>User intent</h3>
+          <p>Is the turn information-seeking at all? There are five classes: information seeking, content creation, coding, no request, not English.</p>
+          <p class="anno-meta"><span>3,907 turns</span><span>2 annotators</span><span>Cohen's κ 0.80</span></p>
+          <a href="intents.html" class="anno-link">Browse intent labels →</a>
+        </div>
+        <div class="card anno">
+          <span class="anno-step">Layer 2</span>
+          <h3 class="icon-head"><svg class="dim-icon" style="--c:var(--icon-domain)" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle class="bg" cx="12" cy="12" r="11"/><path d="M12 5.5l7 12.5H5z" fill="currentColor" stroke="none"/><path d="M12 10v3.6" stroke="var(--icon-domain)"/><circle cx="12" cy="16" r=".4" stroke="var(--icon-domain)"/></svg>Risk-sensitive domain</h3>
+          <p>Domains where a wrong or incomplete answer could affect someone's life, safety, health, money or decisions.</p>
+          <p class="anno-meta"><span>7 classes</span><span>3 annotators</span><span>Fleiss κ 0.82</span></p>
+          <details class="defs"><summary>Domain definitions</summary><dl id="domainDefs"></dl></details>
+        </div>
+        <div class="card anno">
+          <span class="anno-step">Layer 3</span>
+          <h3 class="icon-head"><svg class="dim-icon" style="--c:var(--icon-open)" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle class="bg" cx="12" cy="12" r="11"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2.9-1.2 1.7v.4"/><circle cx="12" cy="16.9" r=".35"/></svg>Open-endedness</h3>
+          <p><strong>Factoid</strong> queries can be answered from a single verifiable source. <strong>Analytical</strong> queries need reasoning, comparison, instructions, prediction or judgment.</p>
+          <p class="anno-meta"><span>2 classes</span><span>3 annotators</span><span>Fleiss κ 0.62</span><span>majority vote</span></p>
+          <details class="defs"><summary>Decision rules</summary><dl>
+            <dt>Factoid</dt><dd>Definitions, historical or scientific facts, descriptions of entities or systems, text lookup. Typical signals: <em>What is / Who is / When did</em>.</dd>
+            <dt>Analytical</dt><dd>Procedural steps, comparisons and trade-offs, predictions, advice or value judgments. Typical signals: <em>How to / Why / Should I / Best / Compare</em>.</dd>
+            <dt>Borderline</dt><dd>If one verifiable fact or a concise description answers it, it is factoid. Instructions, predictions and opinions are always analytical.</dd>
+          </dl></details>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash card" id="browse">
       <div class="dash-head">
         <h3>Explore the annotated queries</h3>
         <p class="caption">Click a cell, row, column or bar to filter. Every panel updates to match the current selection.</p>
