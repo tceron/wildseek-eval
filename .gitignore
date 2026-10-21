@@ -36,3 +36,4 @@ generated_responses/
 
 # GitHub Pages site data
 !docs/data/*.json
+!docs/data/responses/*.json

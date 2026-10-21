@@ -68,6 +68,7 @@ const DOMAIN_DEFS = [
 ];
 const MODEL_COLOR = { "GPT-5.4": "--s-gpt", "Gemini-3.1": "--s-gemini", "Claude-4.6": "--s-claude", "Llama-3.3-70B": "--s-llama" };
 const PAGE = 20;
+const RESPONSE_SHARDS = 64; // must match build_data.py
 
 // ---------- Helpers ----------
 const $ = (id) => document.getElementById(id);
@@ -539,6 +540,17 @@ function pagedList({ listEl, pagerEl, countEl, items, renderItem, noun }) {
 
 function debounce(fn, ms = 150) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
+// Failed responses are sharded by the numeric part of the prompt id
+const responseShards = {};
+function loadResponses(id) {
+  const n = parseInt(id, 10) % RESPONSE_SHARDS;
+  responseShards[n] ??= fetch(`data/responses/${n}.json`).then((r) => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  }).catch((err) => { delete responseShards[n]; throw err; });
+  return responseShards[n].then((shard) => shard[id] || {});
+}
+
 function initBrowse(Q, meta) {
   Q = Q.filter((q) => !q.dup && q.d !== "Other");
   const crits = meta.criteria;
@@ -556,13 +568,43 @@ function initBrowse(Q, meta) {
     const table = Object.keys(q.v).length
       ? `<details><summary>Verdicts per model</summary><div class="table-scroll"><table class="vtable"><thead><tr><th class="l">Setup</th>${crits.map((c) => `<th>${CRITERIA[c][0]}</th>`).join("")}</tr></thead><tbody>` +
         meta.setups.filter((s) => q.v[s.key]).map((s) => `<tr><th class="l">${setupLabel(s)}</th>${[...q.v[s.key]].map((x) =>
-          x === "0" ? `<td class="f">✕ fail</td>` : x === "1" ? `<td class="p">✓</td>` : `<td class="p">–</td>`).join("")}</tr>`).join("") +
-        `</tbody></table></div></details>`
+          x === "0" ? `<td class="f"><button type="button" class="resp-btn" data-k="${s.key}" aria-expanded="false" title="Show the ${esc(setupLabel(s))} response">✕ fail</button></td>` : x === "1" ? `<td class="p">✓</td>` : `<td class="p">–</td>`).join("")}</tr>`).join("") +
+        `</tbody></table></div><div class="resp" hidden></div></details>`
       : "";
-    return `<li class="qitem"><p class="qtext">${esc(q.q)}</p><div class="qmeta"><span class="chip">${esc(q.d)}</span><span class="chip">${q.t}</span><span class="chip">${q.s}</span>${failChips}</div>${table}</li>`;
+    return `<li class="qitem" data-id="${esc(q.id)}"><p class="qtext">${esc(q.q)}</p><div class="qmeta"><span class="chip">${esc(q.d)}</span><span class="chip">${q.t}</span><span class="chip">${q.s}</span>${failChips}</div>${table}</li>`;
   };
 
   const list = pagedList({ listEl: $("bList"), pagerEl: $("bPager"), countEl: $("bCount"), items: Q, renderItem, noun: "queries" });
+  const byId = new Map(Q.map((q) => [q.id, q]));
+
+  // Clicking a "fail" cell shows that setup's response below the verdict table
+  $("bList").addEventListener("click", async (e) => {
+    const btn = e.target.closest(".resp-btn, .resp-close");
+    if (!btn) return;
+    const item = btn.closest(".qitem"), panel = item.querySelector(".resp");
+    const key = btn.dataset.k;
+    const close = () => {
+      panel.hidden = true; panel.dataset.k = "";
+      item.querySelectorAll(".resp-btn").forEach((b) => b.setAttribute("aria-expanded", "false"));
+    };
+    if (btn.classList.contains("resp-close") || panel.dataset.k === key) return close();
+    close();
+    item.querySelectorAll(`.resp-btn[data-k="${key}"]`).forEach((b) => b.setAttribute("aria-expanded", "true"));
+    const q = byId.get(item.dataset.id), s = meta.setups.find((x) => x.key === key);
+    const failed = crits.filter((c, ci) => q.v[key][ci] === "0").map((c) => CRITERIA[c][0]);
+    panel.dataset.k = key;
+    panel.hidden = false;
+    panel.innerHTML = `<p class="resp-loading">Loading response…</p>`;
+    let html;
+    try {
+      const text = (await loadResponses(q.id))[key];
+      html = text ? `<div class="resp-text">${esc(text)}</div>` : `<p class="empty">No response text is available for this setup.</p>`;
+    } catch (err) {
+      html = `<p class="empty">Could not load the response (${esc(err.message)}).</p>`;
+    }
+    if (panel.dataset.k !== key) return; // another cell was clicked meanwhile
+    panel.innerHTML = `<div class="resp-head"><strong>${esc(setupLabel(s))}</strong><span class="chip fail">✕ ${esc(failed.join(", "))}</span><button type="button" class="btn small resp-close">Close</button></div>${html}`;
+  });
 
   function apply() {
     const term = $("bSearch").value.trim().toLowerCase();

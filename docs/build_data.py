@@ -1,4 +1,4 @@
-"""Export the data the GitHub Pages site needs into docs/data/*.json.
+"""Export the data the GitHub Pages site needs into docs/data/ (*.json and responses/*.json).
 
 Run from the repo root after downloading the OSF data (see README):
     python docs/build_data.py
@@ -26,10 +26,17 @@ SETUPS = [
 CRITERIA = ["us_bias", "sycophancy", "overreliance", "vulnerable_population", "anthropomorphism", "dual_use"]
 SOURCES = {"ses": "SES", "WildChat": "WildChat", "lmsys-chat-1m": "LMSYS-Chat-1M", "ShareGPT": "ShareGPT"}
 MAX_INTENT_CHARS = 1500
+# Responses with at least one failed criterion, split into shards so the site
+# fetches only the shard of the query a reader opens. Must match app.js.
+RESPONSE_SHARDS = 64
 
 
 def source_of(prompt_id):
     return SOURCES.get(str(prompt_id).rsplit("_", 1)[-1], "Other")
+
+
+def shard_of(prompt_id):
+    return int(str(prompt_id).split("_", 1)[0]) % RESPONSE_SHARDS
 
 
 def verdict_string(row):
@@ -43,9 +50,17 @@ def verdict_string(row):
 ws = pd.read_csv(ROOT / "data_prompts" / "wildseek.csv").dropna(subset=["factual_or_analytical"])
 ws["dup"] = ws.prompt_id.duplicated()
 verdicts = {}
+shards = [{} for _ in range(RESPONSE_SHARDS)]
 for key, _, _, fname in SETUPS:
     df = pd.read_csv(ROOT / "safety_eval" / fname).drop_duplicates("prompt_id")
     verdicts[key] = dict(zip(df.prompt_id, df.apply(verdict_string, axis=1)))
+    # Responses live in generated_responses/ under the eval file's run name
+    failed = set(df.prompt_id[(df[CRITERIA] == 0).any(axis=1)]) & set(ws.prompt_id)
+    resp = pd.read_csv(ROOT / "generated_responses" / (fname.split("_eval_")[0] + ".csv"))
+    resp = resp.drop_duplicates("prompt_id").dropna(subset=["response"])
+    for pid, text in zip(resp.prompt_id, resp.response):
+        if pid in failed:
+            shards[shard_of(pid)].setdefault(pid, {})[key] = text
 
 queries = []
 for r in ws.itertuples():
@@ -81,3 +96,9 @@ for name, obj in [("queries", queries), ("intents", intents), ("meta", meta)]:
     with open(OUT / f"{name}.json", "w") as f:
         json.dump(obj, f, ensure_ascii=False, separators=(",", ":"))
     print(f"{name}.json: {(OUT / f'{name}.json').stat().st_size / 1e3:.0f} kB")
+
+(OUT / "responses").mkdir(exist_ok=True)
+for i, shard in enumerate(shards):
+    with open(OUT / "responses" / f"{i}.json", "w") as f:
+        json.dump(shard, f, ensure_ascii=False, separators=(",", ":"))
+print(f"responses/: {sum(len(s) for s in shards)} queries in {RESPONSE_SHARDS} shards")

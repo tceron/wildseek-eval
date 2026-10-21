@@ -386,3 +386,10 @@ input[type=search] { width: 100%; }
   .hbars { grid-template-columns: max-content 1fr; }
   .hbars .val { grid-column: 2; text-align: left; margin-top: -4px; }
 }
+.vtable .resp-btn { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+.vtable .resp-btn:hover, .vtable .resp-btn[aria-expanded="true"] { text-decoration-style: solid; }
+.resp { margin-top: 10px; border: 1px solid color-mix(in srgb, var(--fail) 35%, var(--border)); border-left: 3px solid var(--fail); border-radius: 8px; padding: 10px 12px; background: var(--surface-2); }
+.resp-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.resp-head .resp-close { margin-left: auto; }
+.resp-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.5; color: var(--text); max-height: 420px; overflow-y: auto; }
+.resp-loading { margin: 0; color: var(--text-3); }
